@@ -57,7 +57,9 @@
                                             </div>
                                             <dl class="row">
                                                 <dt class="col-sm-3">Địa Chỉ Ví</dt>
-                                                <dd class="col-sm-9"><%=address%></dd>
+                                                <dd class="col-sm-9"><%=publicKey%></dd>
+                                                <dt class="col-sm-3">Khóa Bảo Mật</dt>
+                                                <dd class="col-sm-9"><%=privateKey%></dd>
                                                 <dt class="col-sm-3">Số Dư Tài Khoản</dt>
                                                 <dd class="col-sm-9"><%=coin%></dd>
                                               
@@ -83,10 +85,10 @@
                                                       <tbody>
                                                         <%transfers.forEach(function(trans){%>
                                                             <tr>
-                                                                <td><%=trans.fromAddress%></td>
-                                                                <td><%=trans.toAddress%></td>
-                                                                <td><%=trans.amount%></td>
-                                                                <td><%=trans.date%></td>
+                                                                <td  style="word-break: break-all"><%=trans.fromAddress%></td>
+                                                                <td  style="word-break: break-all"><%=trans.toAddress%></td>
+                                                                <td  style="word-break: break-all"><%=trans.amount%></td>
+                                                                <td  style="word-break: break-all"><%=trans.date%></td>
                                                               </tr>
                                                         <%})%>
                                                        

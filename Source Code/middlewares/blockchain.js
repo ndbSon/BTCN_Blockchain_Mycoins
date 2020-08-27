@@ -1,17 +1,17 @@
 const SHA256 = require("crypto-js/sha256");
+const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
 class Block {
-    constructor(timestamp, transactions, previousHash = '') {
+    constructor(timestamp, votes, previousHash = '') {
         this.previousHash = previousHash;
         this.timestamp = timestamp;
-        this.transactions = transactions;
+        this.votes = votes;
         this.hash = this.calculateHash();
         this.nonce = 0;
     }
     calculateHash() {
-        return crypto.createHash('sha256').update(this.previousHash +
-            this.timestamp + JSON.stringify(this.transactions) +
-            this.nonce).digest('hex');
-    }
+        return SHA256(this.previousHash + this.timestamp + JSON.stringify(this.transactions) + this.nonce).toString();
+      }
 
     mineBlock(difficulty) {
         while (this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")) {
@@ -20,18 +20,27 @@ class Block {
         }
         console.log("BLOCK MINED: " + this.hash);
     }
+    hasValidTransactions() {
+        for (const tx of this.transactions) {
+          if (!tx.isValid()) {
+            return false;
+          }
+        }
+    
+        return true;
+      }
 
 }
 class Blockchain {
     constructor() {
         this.chain = [this.createFirstBlock()];
-        this.difficulty = 4;
+        this.difficulty = 1;
 
         // Nơi lưu trữ các transaction đang chờ được xữ lý để đưa vào block
         this.pendingTransactions = [];
 
         // Số coin mà miner sẽ nhận được sau khi đào được block
-        this.miningReward = 10;
+        this.miningReward = 100;
     }
 
 
@@ -52,17 +61,17 @@ class Blockchain {
     }
 
     minePendingTransactions(miningRewardAddress) {
-
-        const rewardTx = new Transaction(null, miningRewardAddress, this.miningReward);
-        this.pendingTransactions.push(rewardTx);
-
         // Tạo một block mới với tất cả các transaction pending và đào nó
-        let block = new Block(Date().toString(), this.pendingTransactions, this.getLatestBlock().hash);
+        let block = new Block(Date.now().toString(), this.pendingTransactions, this.getLatestBlock().hash);
         block.mineBlock(this.difficulty);
-
+    
         // Thêm block vừa được đào vào chuỗi
         this.chain.push(block);
-
+    
+        // Reset các transaction pending và gửi phần thưởng cho thợ đào
+        this.pendingTransactions = [
+            new Transaction(null, miningRewardAddress, this.miningReward)
+        ];
     }
     addTransaction(transaction) {
         if (!transaction.fromAddress || !transaction.toAddress) {
@@ -78,9 +87,12 @@ class Blockchain {
             throw new Error('Transaction amount should be higher than 0');
         }
 
-        // Making sure that the amount sent is not greater than existing balance
-        if (this.getBalanceOfAddress(transaction.fromAddress) < transaction.amount) {
-            throw new Error('Not enough balance');
+        // Making sure that the amount sent is not greater than existing balance    // để test
+        if(transaction.fromAddress!="04a34cf3a472e099ccafcb75c85f07c5fd66df997480b58dd2246b934031ba9f3aaf0423fcff28ba202fd848eaef902ea7569658fd59e9e751ea207d533697e008"){
+            if (this.getBalanceOfAddress(transaction.fromAddress) < transaction.amount) {
+                throw new Error('Not enough balance');
+            }
+    
         }
 
         this.pendingTransactions.push(transaction);
@@ -92,7 +104,7 @@ class Blockchain {
         let balance = 0;
 
         // Lặp qua từng block và các transaction bên trong một block
-
+        console.log("chain: ",this.chain)
         for (const block of this.chain) {
             for (const trans of block.transactions) {
                 // Nếu address cần kiểm tra số dư là người gửi, hãy giảm balance
@@ -146,8 +158,8 @@ class Transaction {
         this.date = Date.now().toString();
     }
     calculateHash() {
-        return crypto.createHash('sha256').update(this.fromAddress + this.toAddress + this.amount + this.timestamp).digest('hex');
-    }
+        return SHA256(this.previousHash + this.timestamp + JSON.stringify(this.transactions) + this.nonce).toString();
+      }
     signTransaction(signingKey) {
         // You can only send a transaction from the wallet that is linked to your
         // key. So here we check if the fromAddress matches your publicKey

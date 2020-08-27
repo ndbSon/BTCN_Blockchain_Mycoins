@@ -63,7 +63,7 @@
                                                         Transfers
                                                       </h4>
                                                     </div>
-                                                    <table class="table table-hover">
+                                                    <table class="table table-hover" >
                                                       <thead>
                                                           <tr>
                                                             <th scope="col">Từ</th>
@@ -75,10 +75,10 @@
                                                       <tbody id="history">
                                                         <%transfers.forEach(function(trans){%>
                                                           <tr>
-                                                            <td><%=trans.fromAddress%></td>
-                                                            <td><%=trans.toAddress%></td>
-                                                            <td><%=trans.amount%></td>
-                                                            <td><%=trans.date%></td>
+                                                            <td  style="word-break: break-all"><%=trans.fromAddress%></td>
+                                                            <td  style="word-break: break-all"><%=trans.toAddress%></td>
+                                                            <td  style="word-break: break-all"><%=trans.amount%></td>
+                                                            <td  style="word-break: break-all"><%=trans.date%></td>
                                                           </tr>
                                                         <%})%>
                                                        
